@@ -157,9 +157,7 @@ export default function UserNewEditForm() {
         enqueueSnackbar(data.description, {variant: data.response_type});
         setIsDrawn(true);
         setGraphData(data);
-        if(data.status_code === 200){
-          handleInsightDrawMutation();
-        }
+        
       },
     });
   
