@@ -70,14 +70,11 @@ export default function UserNewEditForm() {
             const percentageCompleted =
               Math.round(progressEvent.loaded * 100) / progressEvent.total;
             console.log('percent', percentageCompleted);
-            // setTimeout(() => setCompleted(0), 5000);
           },
         })
         .then((res) => res.data),
 
     onMutate: async (payload) => {
-      // const [file, filename] = payload.getAll('file');
-      // const url = URL.createObjectURL(file);
       const docs = queryClient.cancelQueries('upload_file');
       queryClient.setQueryData('upload_file', (old) => [
         ...(old ?? []),
@@ -95,10 +92,11 @@ export default function UserNewEditForm() {
 
     onSuccess: (data) => {
       console.log('data', data);
-      queryClient.setQueryData('upload_file', data);
-      setIsUploaded(true);
-      enqueueSnackbar('Successfully uploaded your file!');
-      // handleFileCleanMutation();
+      enqueueSnackbar(data.description, {variant: data.response_type});
+      if(data.status_code === 200){
+        setIsUploaded(true);
+        handleFileCleanMutation();
+      }
     },
   });
 
@@ -127,13 +125,20 @@ export default function UserNewEditForm() {
 
     onSuccess: (data) => {
       console.log('clean_file', data);
-      queryClient.setQueryData('clean_file', data);
-      setIsCleaned(true);
-      setCleanedData(data);
-      enqueueSnackbar('Successfully loaded your file!');
-      // handleInsightDrawMutation();
+      enqueueSnackbar(data.description, {variant: data.response_type});
+      if(data.status_code === 200){
+        setIsCleaned(true);
+        setCleanedData(data);
+        handleFileCleanMutation();
+        handleInsightDrawMutation();
+      }
     },
   });
+
+  const handleFileClean = () => {
+    setIsCleaned(false);
+    handleFileCleanMutation()
+  }
 
   // ===================================================================================================
   const { mutate: handleInsightDrawMutation, isPending: isPendingInsightDrawMutation } =
@@ -149,13 +154,21 @@ export default function UserNewEditForm() {
       onError: (err, variables, recover) => (typeof recover === 'function' ? recover() : null),
 
       onSuccess: (data) => {
-        queryClient.setQueryData('draw_insights', data);
-        setIsDrawn(true);
-        setGraphData(data);
         console.log('data', data);
-        enqueueSnackbar('Successfully loaded your file!');
+        enqueueSnackbar(data.description, {variant: data.response_type});
+        if(data.status_code === 200){
+          setIsDrawn(true);
+          setGraphData(data);
+          handleFileCleanMutation();
+          handleInsightDrawMutation();
+        }
       },
     });
+  
+    const handleInsightDraw = () => {
+      setIsDrawn(false)
+      handleInsightDrawMutation()
+    }
 
   // ===================================================================================================
 
@@ -192,7 +205,7 @@ export default function UserNewEditForm() {
                       type="button"
                       variant="outlined"
                       sx={{ width: '100%' }}
-                      onClick={() => handleFileCleanMutation()}
+                      onClick={() => handleFileClean()}
                       loading={isPendingFileCleanMutation}
                     >
                       Retry
@@ -224,7 +237,7 @@ export default function UserNewEditForm() {
                       type="button"
                       variant="outlined"
                       sx={{ width: '100%' }}
-                      onClick={() => handleInsightDrawMutation()}
+                      onClick={() => handleInsightDraw()}
                       loading={isPendingInsightDrawMutation}
                     >
                       Draw
