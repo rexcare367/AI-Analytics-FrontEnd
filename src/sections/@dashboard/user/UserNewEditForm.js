@@ -126,10 +126,9 @@ export default function UserNewEditForm() {
     onSuccess: (data) => {
       console.log('clean_file', data);
       enqueueSnackbar(data.description, {variant: data.response_type});
-      if(data.status_code === 200){
+      setCleanedData(data);
         setIsCleaned(true);
-        setCleanedData(data);
-        handleFileCleanMutation();
+        if(data.status_code === 200){
         handleInsightDrawMutation();
       }
     },
@@ -156,10 +155,9 @@ export default function UserNewEditForm() {
       onSuccess: (data) => {
         console.log('data', data);
         enqueueSnackbar(data.description, {variant: data.response_type});
+        setIsDrawn(true);
+        setGraphData(data);
         if(data.status_code === 200){
-          setIsDrawn(true);
-          setGraphData(data);
-          handleFileCleanMutation();
           handleInsightDrawMutation();
         }
       },

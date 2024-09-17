@@ -38,7 +38,6 @@ export default function GeneralAppPage() {
     onError: (err, variables, recover) => (typeof recover === 'function' ? recover() : null),
 
     onSuccess: (data) => {
-      queryClient.setQueryData('load_data', data);
       navigate(`${PATH_DASHBOARD.user.new}?id=${data.data._id}`);
     },
   });
