@@ -188,14 +188,12 @@ export default function UserNewEditForm() {
     handleInsightDrawMutation()
     }, [handleInsightDrawMutation])
 
-  const { data: stateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
+  const { data: stateData, isSuccess: isSuccessStateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
     queryKey: ['state_data'],
     queryFn: () => axios.get(`analytic/check_status/${id}`).then((res) => {
       console.log('res', res.data, res.data.data.current, currentStep); 
       if(res.data.data.current === currentStep){
         setIsCheckedStatus(false); 
-        if(currentStep === "cleaned" && res.data.data.cleaned.status === "completed" && stateData?.data?.cleaned?.attachments) {setIsFinished(true)}
-        
       }
       else {
         setIsChecking(false);
@@ -208,12 +206,13 @@ export default function UserNewEditForm() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchIntervalInBackground: true,
+    
   });
   useEffect(() => {
-    if (isFinished) {
+    if (currentStep === "cleaned" && isSuccessStateData && stateData?.data?.cleaned?.status === "completed" && stateData?.data?.cleaned?.attachments) {
       handleInsightDraw()
     }
-  }, [isFinished, handleInsightDraw]);
+  }, [isSuccessStateData,stateData, handleInsightDraw, currentStep]);
 
 
   // ===================================================================================================
