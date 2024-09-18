@@ -24,6 +24,21 @@ import { Upload } from '../../../components/upload';
 //   userData: PropTypes.object,
 // };
 
+const Skeleton = () => <div className="flex items-center justify-center h-fit w-full">
+<div className="animate-pulse flex flex-col space-y-4 w-full">
+  <div className="flex flex-col space-y-2 w-full">
+    <div className="h-4 w-full bg-gray-300 rounded"/>
+  </div>
+  <div className="flex flex-row gap-4 w-full">
+    <div className="h-4 w-full bg-gray-300 rounded"/>
+    <div className="h-4 w-full bg-gray-300 rounded"/>
+  </div>
+  <div className="flex flex-col space-y-2 w-full">
+    <div className="h-4 w-full bg-gray-300 rounded"/>
+  </div>
+</div>
+</div>
+
 export default function UserNewEditForm() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
@@ -195,7 +210,7 @@ export default function UserNewEditForm() {
             </Typography> */}
           <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
             {/* <RHFTextField name="name" label="Name of child" /> */}
-            <Card sx={{ width: '100%' }}>
+      <Card sx={{ width: '100%' }}>
               <CardHeader title="1. Upload Your Data File" />
               <CardContent>
                 <Upload
@@ -228,7 +243,7 @@ export default function UserNewEditForm() {
                 />
                 <CardContent>
                   {isPendingFileCleanMutation ? (
-                    'loading'
+                    <Skeleton />
                   ) : isCleaned ? (
                     <Stack sx={{fontSize: 12}}>
                       {cleanedData?.data?.map((data) => (
@@ -260,7 +275,7 @@ export default function UserNewEditForm() {
                 />
                 <CardContent>
                   {isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking ? (
-                    'loading'
+                    <Skeleton />
                   ) : isDrawn ? (
                     <Stack sx={{fontSize: 12}}>
                       {stateData?.data?.message?.map((data) => (
