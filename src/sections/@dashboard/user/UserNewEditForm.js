@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // react query
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 // @mui
 import { LoadingButton } from '@mui/lab';
@@ -36,7 +36,8 @@ export default function UserNewEditForm() {
   const [isDrawn, setIsDrawn] = useState(false);
 
   const [cleanedData, setCleanedData] = useState({});
-  const [graphData, setGraphData] = useState({});
+  const [ischecking, setIsChecking] = useState(false);
+  const [isCheckedStatus, setIsCheckedStatus] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -140,8 +141,7 @@ export default function UserNewEditForm() {
   }
 
   // ===================================================================================================
-  const { mutate: handleInsightDrawMutation, isPending: isPendingInsightDrawMutation } =
-    useMutation({
+  const { mutate: handleInsightDrawMutation, isPending: isPendingInsightDrawMutation } = useMutation({
       mutationFn: () => axios.post(`analytic/draw_insights/${id}`).then((res) => res.data),
 
       onMutate: async () => {
@@ -156,15 +156,33 @@ export default function UserNewEditForm() {
         console.log('data', data);
         enqueueSnackbar(data.description, {variant: data.response_type});
         setIsDrawn(true);
-        setGraphData(data);
-        
+        setIsChecking(true);
+        refetchStateData();
       },
-    });
-  
-    const handleInsightDraw = () => {
-      setIsDrawn(false)
-      handleInsightDrawMutation()
-    }
+  });
+
+  const handleInsightDraw = () => {
+    setIsDrawn(false)
+    handleInsightDrawMutation()
+  }
+
+  const { data: stateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
+    queryKey: ['state_data'],
+    queryFn: () => axios.get(`analytic/check_status/${id}`).then((res) => {
+      console.log('res', res.data); 
+      if(res.data.data.current === "insights ready")
+        setIsCheckedStatus(false); 
+      else {
+        setIsChecking(false);
+        setIsCheckedStatus(true);
+      }
+      return res.data; 
+    }),
+    enabled: isDrawn && isCheckedStatus,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
   // ===================================================================================================
 
@@ -212,7 +230,7 @@ export default function UserNewEditForm() {
                   {isPendingFileCleanMutation ? (
                     'loading'
                   ) : isCleaned ? (
-                    <Stack>
+                    <Stack sx={{fontSize: 12}}>
                       {cleanedData?.data?.map((data) => (
                         <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
                       ))}
@@ -224,7 +242,7 @@ export default function UserNewEditForm() {
                 </CardContent>
               </Card>
             )}
-            {isCleaned && (
+            {isCleaned && cleanedData.response_type === "success" && (
               <Card sx={{ width: '100%' }}>
                 <CardHeader
                   title="3. Draw Graph"
@@ -234,27 +252,28 @@ export default function UserNewEditForm() {
                       variant="outlined"
                       sx={{ width: '100%' }}
                       onClick={() => handleInsightDraw()}
-                      loading={isPendingInsightDrawMutation}
+                      loading={isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking}
                     >
                       Draw
                     </LoadingButton>
                   }
                 />
                 <CardContent>
-                  {isPendingInsightDrawMutation ? (
+                  {isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking ? (
                     'loading'
                   ) : isDrawn ? (
-                    <Stack>
-                      {graphData?.data?.message?.map((data) => (
+                    <Stack sx={{fontSize: 12}}>
+                      {stateData?.data?.message?.map((data) => (
                         <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
                       ))}
-                      {graphData?.data?.insights?.map((data) => (
+                      {stateData?.data?.insights?.map((data) => (
                         <img
+                          key={data}
                           src={`https://theorekabucket.s3.eu-north-1.amazonaws.com/${data}`}
                           alt="graph"
                         />
                       ))}
-                      <Typography variant="body2">{graphData?.data?.description}</Typography>
+                      <Typography variant="body2">{stateData?.data?.description}</Typography>
                     </Stack>
                   ) : (
                     'No graph to display'
