@@ -50,9 +50,10 @@ export default function UserNewEditForm() {
   const [isCleaned, setIsCleaned] = useState(false);
   const [isDrawn, setIsDrawn] = useState(false);
 
-  const [cleanedData, setCleanedData] = useState({});
   const [ischecking, setIsChecking] = useState(false);
   const [isCheckedStatus, setIsCheckedStatus] = useState(false);
+
+  const [currentStep, setCurrentStep] = useState('');
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -111,7 +112,7 @@ export default function UserNewEditForm() {
       enqueueSnackbar(data.description, {variant: data.response_type});
       if(data.status_code === 200){
         setIsUploaded(true);
-        handleFileCleanMutation();
+        handleFileClean();
       }
     },
   });
@@ -123,6 +124,7 @@ export default function UserNewEditForm() {
     let formData = new FormData();
     formData.append('file', files[0]);
 
+    setCurrentStep("upload")
     handleFileUploadMutation(formData);
   };
 
@@ -142,16 +144,16 @@ export default function UserNewEditForm() {
     onSuccess: (data) => {
       console.log('clean_file', data);
       enqueueSnackbar(data.description, {variant: data.response_type});
-      setCleanedData(data);
-        setIsCleaned(true);
-        if(data.status_code === 200){
-        handleInsightDrawMutation();
-      }
+      setIsCleaned(true);
+      setIsChecking(true);
+      refetchStateData();
     },
   });
 
   const handleFileClean = () => {
+    setCurrentStep("cleaned")
     setIsCleaned(false);
+    setIsDrawn(false)
     handleFileCleanMutation()
   }
 
@@ -177,6 +179,7 @@ export default function UserNewEditForm() {
   });
 
   const handleInsightDraw = () => {
+    setCurrentStep("insights ready")
     setIsDrawn(false)
     handleInsightDrawMutation()
   }
@@ -184,16 +187,18 @@ export default function UserNewEditForm() {
   const { data: stateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
     queryKey: ['state_data'],
     queryFn: () => axios.get(`analytic/check_status/${id}`).then((res) => {
-      console.log('res', res.data); 
-      if(res.data.data.current === "insights ready")
+      console.log('res', res.data, res.data.data.current, currentStep); 
+      if(res.data.data.current === currentStep){
         setIsCheckedStatus(false); 
+        if(currentStep === "cleaned" && res.data.data.cleaned.status === "completed") handleInsightDraw()
+      }
       else {
         setIsChecking(false);
         setIsCheckedStatus(true);
       }
       return res.data; 
     }),
-    enabled: isDrawn && isCheckedStatus,
+    enabled: (isDrawn || isCleaned) && isCheckedStatus,
     refetchInterval: 5000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -210,7 +215,7 @@ export default function UserNewEditForm() {
             </Typography> */}
           <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
             {/* <RHFTextField name="name" label="Name of child" /> */}
-      <Card sx={{ width: '100%' }}>
+            <Card sx={{ width: '100%' }}>
               <CardHeader title="1. Upload Your Data File" />
               <CardContent>
                 <Upload
@@ -235,21 +240,21 @@ export default function UserNewEditForm() {
                       variant="outlined"
                       sx={{ width: '100%' }}
                       onClick={() => handleFileClean()}
-                      loading={isPendingFileCleanMutation}
+                      loading={ currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || ischecking)}
                     >
                       Retry
                     </LoadingButton>
                   }
                 />
                 <CardContent>
-                  {isPendingFileCleanMutation ? (
+                  {currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || ischecking) ? (
                     <Skeleton />
                   ) : isCleaned ? (
                     <Stack sx={{fontSize: 12}}>
-                      {cleanedData?.data?.map((data) => (
+                      {stateData?.data?.cleaned?.message?.map((data) => (
                         <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
                       ))}
-                      <Typography variant="body2">{cleanedData?.description}</Typography>
+                      <Typography variant="body2">{stateData?.data?.cleaned?.attachments}</Typography>
                     </Stack>
                   ) : (
                     'No data to display'
@@ -257,7 +262,7 @@ export default function UserNewEditForm() {
                 </CardContent>
               </Card>
             )}
-            {isCleaned && cleanedData.response_type === "success" && (
+            {isCleaned && stateData?.data?.cleaned?.attachments && (
               <Card sx={{ width: '100%' }}>
                 <CardHeader
                   title="3. Draw Graph"
@@ -267,14 +272,14 @@ export default function UserNewEditForm() {
                       variant="outlined"
                       sx={{ width: '100%' }}
                       onClick={() => handleInsightDraw()}
-                      loading={isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking}
+                      loading={currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking)}
                     >
                       Draw
                     </LoadingButton>
                   }
                 />
                 <CardContent>
-                  {isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking ? (
+                  {currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking) ? (
                     <Skeleton />
                   ) : isDrawn ? (
                     <Stack sx={{fontSize: 12}}>
@@ -296,28 +301,6 @@ export default function UserNewEditForm() {
                 </CardContent>
               </Card>
             )}
-            {/* <Stack
-                alignItems="center"
-                sx={{ mt: 3, width: 1, gap: 2 }}
-                direction={{ xs: 'column', sm: 'row' }}
-              >
-                <LoadingButton
-                  type="button"
-                  variant="outlined"
-                  onClick={reset}
-                  sx={{ width: '100%' }}
-                >
-                  Clear
-                </LoadingButton>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  loading={isSubmitting}
-                  sx={{ width: '100%' }}
-                >
-                  Upload
-                </LoadingButton>
-              </Stack> */}
           </Stack>
         </Card>
       </Grid>
