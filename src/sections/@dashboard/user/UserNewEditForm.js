@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 // import PropTypes from 'prop-types';
 // import * as Yup from 'yup';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // react query
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -42,6 +42,7 @@ const Skeleton = () => <div className="flex items-center justify-center h-fit w-
 export default function UserNewEditForm() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
+  const drawButtonRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -52,6 +53,8 @@ export default function UserNewEditForm() {
 
   const [ischecking, setIsChecking] = useState(false);
   const [isCheckedStatus, setIsCheckedStatus] = useState(false);
+
+  const [isFinished, setIsFinished] = useState(false);
 
   const [currentStep, setCurrentStep] = useState('');
 
@@ -148,6 +151,7 @@ export default function UserNewEditForm() {
       setIsChecking(true);
       refetchStateData();
     },
+    
   });
 
   const handleFileClean = () => {
@@ -178,11 +182,11 @@ export default function UserNewEditForm() {
       },
   });
 
-  const handleInsightDraw = () => {
+  const handleInsightDraw = useCallback(() => {
     setCurrentStep("insights ready")
     setIsDrawn(false)
     handleInsightDrawMutation()
-  }
+    }, [handleInsightDrawMutation])
 
   const { data: stateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
     queryKey: ['state_data'],
@@ -190,7 +194,8 @@ export default function UserNewEditForm() {
       console.log('res', res.data, res.data.data.current, currentStep); 
       if(res.data.data.current === currentStep){
         setIsCheckedStatus(false); 
-        if(currentStep === "cleaned" && res.data.data.cleaned.status === "completed") handleInsightDraw()
+        if(currentStep === "cleaned" && res.data.data.cleaned.status === "completed" && stateData?.data?.cleaned?.attachments) {setIsFinished(true)}
+        
       }
       else {
         setIsChecking(false);
@@ -202,7 +207,14 @@ export default function UserNewEditForm() {
     refetchInterval: 5000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    refetchIntervalInBackground: true,
   });
+  useEffect(() => {
+    if (isFinished) {
+      handleInsightDraw()
+    }
+  }, [isFinished, handleInsightDraw]);
+
 
   // ===================================================================================================
 
@@ -210,6 +222,8 @@ export default function UserNewEditForm() {
     <Grid container spacing={3}>
       <Grid item xs={12} md={12}>
         <Card sx={{ p: 3 }}>
+          {isCleaned ? 'isCleaned' : 'not isCleaned'}
+          {currentStep}
           {/* <Typography variant="h4" gutterBottom>
               Step 1
             </Typography> */}
@@ -268,6 +282,7 @@ export default function UserNewEditForm() {
                   title="3. Draw Graph"
                   action={
                     <LoadingButton
+                      ref={drawButtonRef}
                       type="button"
                       variant="outlined"
                       sx={{ width: '100%' }}
