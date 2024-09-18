@@ -24,17 +24,17 @@ import { Upload } from '../../../components/upload';
 //   userData: PropTypes.object,
 // };
 
-const Skeleton = () => <div className="flex items-center justify-center h-fit w-full">
-<div className="animate-pulse flex flex-col space-y-4 w-full">
-  <div className="flex flex-col space-y-2 w-full">
-    <div className="h-4 w-full bg-gray-300 rounded"/>
+const Skeleton = () => <div className="flex items-center justify-center w-full h-fit">
+<div className="flex flex-col w-full space-y-4 animate-pulse">
+  <div className="flex flex-col w-full space-y-2">
+    <div className="w-full h-4 bg-gray-300 rounded"/>
   </div>
-  <div className="flex flex-row gap-4 w-full">
-    <div className="h-4 w-full bg-gray-300 rounded"/>
-    <div className="h-4 w-full bg-gray-300 rounded"/>
+  <div className="flex flex-row w-full gap-4">
+    <div className="w-full h-4 bg-gray-300 rounded"/>
+    <div className="w-full h-4 bg-gray-300 rounded"/>
   </div>
-  <div className="flex flex-col space-y-2 w-full">
-    <div className="h-4 w-full bg-gray-300 rounded"/>
+  <div className="flex flex-col w-full space-y-2">
+    <div className="w-full h-4 bg-gray-300 rounded"/>
   </div>
 </div>
 </div>
@@ -42,7 +42,6 @@ const Skeleton = () => <div className="flex items-center justify-center h-fit w-
 export default function UserNewEditForm() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
-  const drawButtonRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -51,12 +50,13 @@ export default function UserNewEditForm() {
   const [isCleaned, setIsCleaned] = useState(false);
   const [isDrawn, setIsDrawn] = useState(false);
 
-  const [ischecking, setIsChecking] = useState(false);
-  const [isCheckedStatus, setIsCheckedStatus] = useState(false);
+  const [isCheckingClean, setIsCheckingClean] = useState(false);
+  const [isCheckedStatusClean, setIsCheckedStatusClean] = useState(false);
 
-  const [isFinished, setIsFinished] = useState(false);
+  const [isCheckingDraw, setIsCheckingDraw] = useState(false);
+  const [isCheckedStatusDraw, setIsCheckedStatusDraw] = useState(false);
 
-  const [currentStep, setCurrentStep] = useState('');
+  const [currentStep, setCurrentStep] = useState('upload');
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -148,8 +148,7 @@ export default function UserNewEditForm() {
       console.log('clean_file', data);
       enqueueSnackbar(data.description, {variant: data.response_type});
       setIsCleaned(true);
-      setIsChecking(true);
-      refetchStateData();
+      setIsCheckedStatusClean(true);
     },
     
   });
@@ -158,6 +157,7 @@ export default function UserNewEditForm() {
     setCurrentStep("cleaned")
     setIsCleaned(false);
     setIsDrawn(false)
+    setIsCheckingClean(true);
     handleFileCleanMutation()
   }
 
@@ -177,43 +177,64 @@ export default function UserNewEditForm() {
         console.log('data', data);
         enqueueSnackbar(data.description, {variant: data.response_type});
         setIsDrawn(true);
-        setIsChecking(true);
-        refetchStateData();
+        setIsCheckedStatusDraw(true);
       },
+      
   });
 
   const handleInsightDraw = useCallback(() => {
     setCurrentStep("insights ready")
     setIsDrawn(false)
+    setIsCheckingDraw(true)
     handleInsightDrawMutation()
-    }, [handleInsightDrawMutation])
+  }, [handleInsightDrawMutation])
 
-  const { data: stateData, isSuccess: isSuccessStateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData, refetch: refetchStateData } = useQuery({
-    queryKey: ['state_data'],
+  const { data: stateData, isSuccess: isSuccessStateData, isLoading: isLoadingStateData, isFetching: isFetchingStateData } = useQuery({
+    queryKey: ['cleaned_state_data'],
     queryFn: () => axios.get(`analytic/check_status/${id}`).then((res) => {
       console.log('res', res.data, res.data.data.current, currentStep); 
-      if(res.data.data.current === currentStep){
-        setIsCheckedStatus(false); 
+      if(res.data.data.current === "cleaned"){
+        setIsCheckedStatusClean(false); 
+        setIsCheckingClean(false);
       }
       else {
-        setIsChecking(false);
-        setIsCheckedStatus(true);
+        setIsCheckedStatusClean(true);
       }
       return res.data; 
     }),
-    enabled: (isDrawn || isCleaned) && isCheckedStatus,
+    enabled: (isCleaned) && isCheckedStatusClean,
     refetchInterval: 5000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    refetchIntervalInBackground: true,
-    
+    gcTime: 0
   });
+
   useEffect(() => {
     if (currentStep === "cleaned" && isSuccessStateData && stateData?.data?.cleaned?.status === "completed" && stateData?.data?.cleaned?.attachments) {
       handleInsightDraw()
     }
-  }, [isSuccessStateData,stateData, handleInsightDraw, currentStep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccessStateData, currentStep, stateData]);
 
+  const { data: insights_state_data, isLoading: isLoadingInsightsStateData, isFetching: isFetchingInsightsStateData } = useQuery({
+    queryKey: ['insights_state_data'],
+    queryFn: () => axios.get(`analytic/check_status/${id}`).then((res) => {
+      console.log('res', res.data, res.data.data.current, currentStep); 
+      if(res.data.data.current === "insights ready"){
+        setIsCheckedStatusDraw(false); 
+        setIsCheckingDraw(false);
+      }
+      else {
+        setIsCheckedStatusDraw(true);
+      }
+      return res.data; 
+    }),
+    enabled: (isDrawn) && isCheckedStatusDraw,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchIntervalInBackground: true,
+  });
 
   // ===================================================================================================
 
@@ -221,8 +242,21 @@ export default function UserNewEditForm() {
     <Grid container spacing={3}>
       <Grid item xs={12} md={12}>
         <Card sx={{ p: 3 }}>
-          {isCleaned ? 'isCleaned' : 'not isCleaned'}
-          {currentStep}
+          {/* {isCleaned ? 'isCleaned' : 'not isCleaned'} <br/>
+          {isDrawn ? 'isDrawn' : 'not isDrawn'} <br/>
+          {isSuccessStateData ? 'isSuccessStateData' : 'not isSuccessStateData'} <br/>
+          {isCheckedStatusClean ? 'isCheckedStatusClean' : 'not isCheckedStatusClean'} <br/>
+          {isCheckedStatusDraw ? 'isCheckedStatusDraw' : 'not isCheckedStatusDraw'} <br/>
+          {isLoadingStateData ? 'isLoadingStateData' : 'not isLoadingStateData'} <br/>
+          {isLoadingInsightsStateData ? 'isLoadingInsightsStateData' : 'not isLoadingInsightsStateData'} <br/>
+          {isFetchingStateData ? 'isFetchingStateData' : 'not isFetchingStateData'} <br/>
+          {isFetchingInsightsStateData ? 'isFetchingInsightsStateData' : 'not isFetchingInsightsStateData'} <br/>
+          {isPendingFileCleanMutation ? 'isPendingFileCleanMutation' : 'not isPendingFileCleanMutation'} <br/>
+          {isPendingInsightDrawMutation ? 'isPendingInsightDrawMutation' : 'not isPendingInsightDrawMutation'} <br/>
+          {isPendingFileUploadMutation ? 'isPendingFileUploadMutation' : 'not isPendingFileUploadMutation'} <br/>
+          {isCheckingClean ? 'isCheckingClean' : 'not isCheckingClean'} <br/>
+          {isCheckingDraw ? 'isCheckingDraw' : 'not isCheckingDraw'} <br/>
+          {currentStep} */}
           {/* <Typography variant="h4" gutterBottom>
               Step 1
             </Typography> */}
@@ -243,7 +277,7 @@ export default function UserNewEditForm() {
                 />
               </CardContent>
             </Card>
-            {isUploaded && (
+            {(currentStep === "insights ready" || currentStep === "cleaned") && (
               <Card sx={{ width: '100%' }}>
                 <CardHeader
                   title="2. Load and Clean Data from your file"
@@ -253,65 +287,56 @@ export default function UserNewEditForm() {
                       variant="outlined"
                       sx={{ width: '100%' }}
                       onClick={() => handleFileClean()}
-                      loading={ currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || ischecking)}
+                      loading={ currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || isCheckingClean)}
                     >
                       Retry
                     </LoadingButton>
                   }
                 />
                 <CardContent>
-                  {currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || ischecking) ? (
+                  {currentStep === "cleaned" && (isPendingFileCleanMutation || isLoadingStateData || isFetchingStateData || isCheckingClean) ? (
                     <Skeleton />
-                  ) : isCleaned ? (
-                    <Stack sx={{fontSize: 12}}>
-                      {stateData?.data?.cleaned?.message?.map((data) => (
-                        <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
-                      ))}
-                      <Typography variant="body2">{stateData?.data?.cleaned?.attachments}</Typography>
-                    </Stack>
-                  ) : (
-                    'No data to display'
-                  )}
+                  ) : <Stack sx={{fontSize: 12}}>
+                  {stateData?.data?.cleaned?.message?.map((data) => (
+                    <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
+                  ))}
+                  <Typography variant="body2">{stateData?.data?.cleaned?.attachments}</Typography>
+                </Stack>}
                 </CardContent>
               </Card>
             )}
-            {isCleaned && stateData?.data?.cleaned?.attachments && (
+            {currentStep === "insights ready" && (
               <Card sx={{ width: '100%' }}>
                 <CardHeader
                   title="3. Draw Graph"
                   action={
                     <LoadingButton
-                      ref={drawButtonRef}
                       type="button"
                       variant="outlined"
                       sx={{ width: '100%' }}
                       onClick={() => handleInsightDraw()}
-                      loading={currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking)}
+                      loading={currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingInsightsStateData || isFetchingInsightsStateData || isCheckingDraw)}
                     >
                       Draw
                     </LoadingButton>
                   }
                 />
                 <CardContent>
-                  {currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingStateData || isFetchingStateData || ischecking) ? (
+                  {currentStep === "insights ready" && (isPendingInsightDrawMutation || isLoadingInsightsStateData || isFetchingInsightsStateData || isCheckingDraw) ? (
                     <Skeleton />
-                  ) : isDrawn ? (
-                    <Stack sx={{fontSize: 12}}>
-                      {stateData?.data?.message?.map((data) => (
-                        <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
-                      ))}
-                      {stateData?.data?.insights?.map((data) => (
-                        <img
-                          key={data}
-                          src={`https://theorekabucket.s3.eu-north-1.amazonaws.com/${data}`}
-                          alt="graph"
-                        />
-                      ))}
-                      <Typography variant="body2">{stateData?.data?.description}</Typography>
-                    </Stack>
-                  ) : (
-                    'No graph to display'
-                  )}
+                  ) : <Stack sx={{fontSize: 12}}>
+                  {insights_state_data?.data?.message?.map((data) => (
+                    <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
+                  ))}
+                  {insights_state_data?.data?.insights?.map((data) => (
+                    <img
+                      key={data}
+                      src={`https://theorekabucket.s3.eu-north-1.amazonaws.com/${data}`}
+                      alt="graph"
+                    />
+                  ))}
+                  <Typography variant="body2">{insights_state_data?.data?.description}</Typography>
+                </Stack>}
                 </CardContent>
               </Card>
             )}
