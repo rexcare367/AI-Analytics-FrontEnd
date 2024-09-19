@@ -1,7 +1,8 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-nested-ternary */
 // import PropTypes from 'prop-types';
 // import * as Yup from 'yup';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // react query
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -9,20 +10,21 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 // @mui
 import { LoadingButton } from '@mui/lab';
-import { Card, Grid, Stack, Typography, CardContent, CardHeader } from '@mui/material';
+import { Link, Card, Grid, Stack, CardContent, CardHeader, Table, TableRow, TableBody, TableCell, TableHead, TableContainer  } from '@mui/material';
 // routes
 // import { PATH_DASHBOARD } from '../../../routes/paths';
 // utils
+import Scrollbar from '../../../components/scrollbar';
 import { useSnackbar } from '../../../components/snackbar';
 import axios from '../../../utils/analyticAxios';
 // components
 import { Upload } from '../../../components/upload';
-
 // ----------------------------------------------------------------------
 
 // UserNewEditForm.propTypes = {
 //   userData: PropTypes.object,
 // };
+
 
 const Skeleton = () => <div className="flex items-center justify-center w-full h-fit">
 <div className="flex flex-col w-full space-y-4 animate-pulse">
@@ -300,7 +302,30 @@ export default function UserNewEditForm() {
                   {stateData?.data?.cleaned?.message?.map((data) => (
                     <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
                   ))}
-                  <Typography variant="body2">{stateData?.data?.cleaned?.attachments}</Typography>
+                  <TableContainer sx={{ mt: 3, overflow: 'unset' }} className='border rounded-b-2xl'>
+                    <Scrollbar>
+                      <Table sx={{ minWidth: 800 }} >
+                        {/* <TableHeadCustom headLabel={TABLE_HEAD} /> */}
+                        <TableHead>
+                        <TableRow >
+                        {stateData?.description.length > 0 && Object.keys(stateData?.description[0]).map((key) => <TableCell className='border !p-2 !min-w-32 !text-[0.6rem]' key={key}>{key}</TableCell>)}
+                        </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                          {stateData?.description?.map((row, index) => (
+                            <TableRow key={index}>
+                              {Object.values(row).map((value, idx) => (
+                            <TableCell key={idx} className='!p-2 !text-[0.6rem]'>{value}</TableCell>
+                          ))}
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </Scrollbar>
+                  </TableContainer>
+                  
+                  <Link>{`https://theorekabucket.s3.eu-north-1.amazonaws.com/${stateData?.data?.cleaned?.attachments}.csv`}</Link>
                 </Stack>}
                 </CardContent>
               </Card>
@@ -328,14 +353,16 @@ export default function UserNewEditForm() {
                   {insights_state_data?.data?.message?.map((data) => (
                     <ReactMarkdown language="markdown">{`${data}`}</ReactMarkdown>
                   ))}
+                  <div className='grid grid-cols-2'>
                   {insights_state_data?.data?.insights?.map((data) => (
                     <img
+                    className='col-span-2 lg:col-span-1'
                       key={data}
                       src={`https://theorekabucket.s3.eu-north-1.amazonaws.com/${data}`}
                       alt="graph"
                     />
                   ))}
-                  <Typography variant="body2">{insights_state_data?.data?.description}</Typography>
+                  </div>
                 </Stack>}
                 </CardContent>
               </Card>
