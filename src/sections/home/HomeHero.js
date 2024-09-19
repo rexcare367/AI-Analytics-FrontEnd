@@ -116,7 +116,7 @@ function Description() {
     <StyledDescription>
       <m.div variants={varFade().in}>
         <Typography variant="h2" sx={{ textAlign: 'center' }}>
-          Get Fantastic Graphs <br />
+          Get Fantastic Insights <br />
           with Powerful AI-Analytic Tool
         </Typography>
       </m.div>
