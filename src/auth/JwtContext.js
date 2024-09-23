@@ -29,8 +29,8 @@ const reducer = (state, action) => {
   }
   if (action.type === 'REGISTER') {
     return {
-      isAuthenticated: !!action.payload.isAuthenticated,
       ...state,
+      isAuthenticated: action.payload.isAuthenticated,
       user: action.payload.user,
     };
   }
