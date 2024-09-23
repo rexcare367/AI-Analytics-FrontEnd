@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 // components
 import ScrollProgress from '../components/scroll-progress';
 // sections
-import { HomeHero, HomeMinimal, HomeDarkMode, HomeAdvertisement } from '../sections/home';
+import { HomeHero, HomeMinimal, HomeDarkMode } from '../sections/home';
 
 // ----------------------------------------------------------------------
 

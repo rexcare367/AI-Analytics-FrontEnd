@@ -14,20 +14,19 @@ export default function PaymentCancel() {
   return (
     <>
       <Helmet>
-        <title> Payment Cancel | Theoreka</title>
+        <title> Email Verification | Theoreka</title>
       </Helmet>
 
       <MotionContainer>
         <m.div variants={varBounce().in}>
           <Typography variant="h3" paragraph>
-            Oops, payment faild
+            Oops, Verification faild
           </Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <Typography sx={{ color: 'text.secondary' }}>
-            It looks like your order could not be paid at this time. Please try again or select a
-            different payment option
+            It looks like your token is incorreact. Please try again.
           </Typography>
         </m.div>
 
@@ -41,7 +40,7 @@ export default function PaymentCancel() {
           size="large"
           variant="contained"
         >
-          Go to Your Account
+          Back to login
         </Button>
       </MotionContainer>
     </>

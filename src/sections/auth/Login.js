@@ -1,20 +1,17 @@
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
-import { Alert, Tooltip, Stack, Typography, Link, Box } from '@mui/material';
-// auth
-import { useAuthContext } from '../../auth/useAuthContext';
+import { Stack, Typography, Link } from '@mui/material';
 // routes
 import { PATH_AUTH } from '../../routes/paths';
 // layouts
 import LoginLayout from '../../layouts/login';
 //
 import AuthLoginForm from './AuthLoginForm';
+import AuthLoginWithSocial from './AuthLoginWithSocial';
 
 // ----------------------------------------------------------------------
 
 export default function Login() {
-  const { method } = useAuthContext();
-
   return (
     <LoginLayout>
       <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
@@ -31,7 +28,7 @@ export default function Login() {
 
       <AuthLoginForm />
 
-      {/* <AuthWithSocial /> */}
+      <AuthLoginWithSocial />
     </LoginLayout>
   );
 }

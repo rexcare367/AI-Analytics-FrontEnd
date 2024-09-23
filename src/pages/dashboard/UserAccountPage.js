@@ -10,14 +10,13 @@ import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
 import { useSettingsContext } from '../../components/settings';
 // sections
 import { AccountGeneral, AccountChangePassword } from '../../sections/@dashboard/user/account';
-import UserBear from '../../sections/@dashboard/user/UserBear';
 
 // ----------------------------------------------------------------------
 
 export default function UserAccountPage() {
   const { themeStretch } = useSettingsContext();
 
-  const [currentTab, setCurrentTab] = useState('status_of_order');
+  const [currentTab, setCurrentTab] = useState('general');
 
   const TABS = [
     {

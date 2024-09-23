@@ -23,8 +23,8 @@ import {
   AdminBearReview,
   //
   Page404,
-  PaymentSuccess,
-  PaymentCancel,
+  EmailVerificationSuccess,
+  EmailVerificationFail,
   HomePage, 
 } from './elements';
 
@@ -60,6 +60,8 @@ export default function Router() {
             { path: 'reset-password', element: <ResetPasswordPage /> },
             { path: 'new-password', element: <NewPasswordPage /> },
             { path: 'verify', element: <VerifyCodePage /> },
+            { path: 'verifySuccess', element: <EmailVerificationSuccess /> },
+            { path: 'verifyFail', element: <EmailVerificationFail /> },
           ],
         },
       ],
@@ -105,8 +107,8 @@ export default function Router() {
       element: <CompactLayout />,
       children: [
         { path: '404', element: <Page404 /> },
-        { path: 'payment/success', element: <PaymentSuccess /> },
-        { path: 'payment/fail', element: <PaymentCancel /> },
+        { path: 'payment/success', element: <EmailVerificationSuccess /> },
+        { path: 'payment/fail', element: <EmailVerificationFail /> },
       ],
     },
     { path: '*', element: <Navigate to="/404" replace /> },

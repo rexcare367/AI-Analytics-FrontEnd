@@ -45,6 +45,8 @@ export default function AuthLoginForm() {
     try {
       await login(data.email, data.password);
     } catch (error) {
+      if(error.code === 451)
+        window.location.href="/auth/verify"
       console.error(error);
       reset();
       setError('afterSubmit', {
@@ -76,18 +78,6 @@ export default function AuthLoginForm() {
           }}
         />
       </Stack>
-
-      {/* <Stack alignItems="flex-end" sx={{ my: 2 }}>
-        <Link
-          component={RouterLink}
-          to={PATH_AUTH.resetPassword}
-          variant="body2"
-          color="inherit"
-          underline="always"
-        >
-          Forgot password?
-        </Link>
-      </Stack> */}
 
       <LoadingButton
         fullWidth

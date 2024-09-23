@@ -1,6 +1,6 @@
 import { m } from 'framer-motion';
 // @mui// @mui
-import { styled, alpha, useTheme } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import { Button, Box, Container, Typography, Stack, Grid } from '@mui/material';
 // routes
 import { PATH_DASHBOARD } from '../../routes/paths';
@@ -12,7 +12,7 @@ import { textGradient, bgGradient } from '../../utils/cssStyles';
 import Iconify from '../../components/iconify';
 import { MotionContainer, varFade } from '../../components/animate';
 // config
-import { HEADER} from '../../config-global';
+// import { HEADER} from '../../config-global';
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -142,7 +142,6 @@ function Description() {
             size="large"
             variant="outlined"
             startIcon={<Iconify icon="eva:external-link-fill" width={24} />}
-            target="_blank"
             rel="noopener"
             href={PATH_DASHBOARD.user.new}
             sx={{ borderColor: 'text.primary' }}

@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types';
-import { Link as RouterLink } from 'react-router-dom';
+// import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { AppBar, Toolbar, Box, Link } from '@mui/material';
+import { AppBar, Toolbar, Box } from '@mui/material';
 // config
 import { HEADER } from '../../config-global';
 // utils
 import { bgBlur } from '../../utils/cssStyles';
 // routes
-import { PATH_PAGE } from '../../routes/paths';
+// import { PATH_PAGE } from '../../routes/paths';
 // components
 import Logo from '../../components/logo';
 

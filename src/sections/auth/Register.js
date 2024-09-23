@@ -6,7 +6,7 @@ import LoginLayout from '../../layouts/login';
 // routes
 import { PATH_AUTH } from '../../routes/paths';
 //
-// import AuthWithSocial from './AuthWithSocial';
+import AuthRegisterWithSocial from './AuthRegisterWithSocial';
 import AuthRegisterForm from './AuthRegisterForm';
 
 // ----------------------------------------------------------------------
@@ -28,22 +28,7 @@ export default function Register() {
 
       <AuthRegisterForm />
 
-      {/* <Typography
-        component="div"
-        sx={{ color: 'text.secondary', mt: 3, typography: 'caption', textAlign: 'center' }}
-      >
-        {'By signing up, I agree to '}
-        <Link underline="always" color="text.primary">
-          Terms of Service
-        </Link>
-        {' and '}
-        <Link underline="always" color="text.primary">
-          Privacy Policy
-        </Link>
-        .
-      </Typography> */}
-
-      {/* <AuthWithSocial /> */}
+      <AuthRegisterWithSocial />
     </LoginLayout>
   );
 }

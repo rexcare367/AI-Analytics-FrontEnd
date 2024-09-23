@@ -69,7 +69,7 @@ export default function PreList({ bearId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
   const [apiStatus, setApiStatus] = useState('idle');
-  const [hideAlert, setHideAlert] = useState(false);
+  // const [hideAlert, setHideAlert] = useState(false);
   const [bearData, setBearData] = useState({ status: 'pending', suggestionClipIds: [] });
 
   const loadBear = async () => {
@@ -169,9 +169,9 @@ export default function PreList({ bearId }) {
         <>
           <Alert
             severity={COLORS[apiStatus]}
-            onClose={() => {
-              setHideAlert(true);
-            }}
+            // onClose={() => {
+            //   setHideAlert(true);
+            // }}
           >
             <AlertTitle sx={{ textTransform: 'capitalize' }}> {apiStatus} </AlertTitle>
             {apiStatus === 'idle' && 'Loading the musics according to your order.'}

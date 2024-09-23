@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import ReactDOM from 'react-dom/client';
-//
+import { GoogleOAuthProvider } from "@react-oauth/google"
+
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
@@ -7,8 +9,13 @@ import reportWebVitals from './reportWebVitals';
 // ----------------------------------------------------------------------
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
 
-root.render(<App />);
+root.render(
+    <GoogleOAuthProvider clientId={clientId}>
+        <App />
+    </GoogleOAuthProvider>
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -7,7 +7,7 @@ import { PATH_AUTH } from '../../routes/paths';
 // components
 import Iconify from '../../components/iconify';
 // sections
-import AuthVerifyCodeForm from '../../sections/auth/AuthVerifyCodeForm';
+// import AuthVerifyCodeForm from '../../sections/auth/AuthVerifyCodeForm';
 // assets
 import { EmailInboxIcon } from '../../assets/icons';
 
@@ -17,7 +17,7 @@ export default function VerifyCodePage() {
   return (
     <>
       <Helmet>
-        <title> Verify Code | Theoreka</title>
+        <title> Verify Email | Theoreka </title>
       </Helmet>
 
       <EmailInboxIcon sx={{ mb: 5, height: 96 }} />
@@ -27,14 +27,11 @@ export default function VerifyCodePage() {
       </Typography>
 
       <Typography sx={{ color: 'text.secondary', mb: 5 }}>
-        We have emailed a 6-digit confirmation code to acb@domain, please enter the code in below
-        box to verify your email.
+        We have emailed a confirmation link to your Email, please click the link to verify your email.
       </Typography>
 
-      <AuthVerifyCodeForm />
-
       <Typography variant="body2" sx={{ my: 3 }}>
-        Don’t have a code? &nbsp;
+        Don’t have a link? &nbsp;
         <Link variant="subtitle2">Resend code</Link>
       </Typography>
 

@@ -34,6 +34,6 @@ export const AdminListPage = Loadable(lazy(() => import('../pages/dashboard/User
 export const AdminBearReview = Loadable(lazy(() => import('../pages/dashboard/AdminBearReview')));
 // MAIN
 export const Page404 = Loadable(lazy(() => import('../pages/Page404')));
-export const PaymentSuccess = Loadable(lazy(() => import('../pages/PaymentSuccess')));
-export const PaymentCancel = Loadable(lazy(() => import('../pages/PaymentCancel')));
+export const EmailVerificationSuccess = Loadable(lazy(() => import('../pages/EmailVerificationSuccess')));
+export const EmailVerificationFail = Loadable(lazy(() => import('../pages/EmailVerificationFail')));
 export const HomePage = Loadable(lazy(() => import('../pages/HomePage')));

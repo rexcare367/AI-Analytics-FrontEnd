@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { Box, Grid, Card, Stack, Typography } from '@mui/material';
-// import { LoadingButton } from '@mui/lab';
+import { LoadingButton } from '@mui/lab';
 // auth
 import { useAuthContext } from '../../../../auth/useAuthContext';
 // utils
@@ -161,13 +161,13 @@ export default function AccountGeneral() {
               <RHFTextField name="zipCode" label="Zip/Code" /> */}
             </Box>
 
-            {/* <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <RHFTextField name="about" multiline rows={4} label="About" />
+            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
+              {/* <RHFTextField name="about" multiline rows={4} label="About" /> */}
 
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
                 Save Changes
               </LoadingButton>
-            </Stack> */}
+            </Stack>
           </Card>
         </Grid>
       </Grid>

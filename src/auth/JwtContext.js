@@ -6,14 +6,6 @@ import localStorageAvailable from '../utils/localStorageAvailable';
 //
 import { isValidToken, setSession } from './utils';
 
-// ----------------------------------------------------------------------
-
-// NOTE:
-// We only build demo at basic level.
-// Customer will need to do some extra handling yourself if you want to extend the logic and other features...
-
-// ----------------------------------------------------------------------
-
 const initialState = {
   isInitialized: false,
   isAuthenticated: false,
@@ -37,8 +29,8 @@ const reducer = (state, action) => {
   }
   if (action.type === 'REGISTER') {
     return {
+      isAuthenticated: !!action.payload.isAuthenticated,
       ...state,
-      isAuthenticated: true,
       user: action.payload.user,
     };
   }
@@ -129,6 +121,23 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  // Google LOGIN
+  const loginWithGoogle = useCallback(async (email) => {
+    const response = await axios.post('auth/login-with-google', {
+      email,
+    });
+    const { tokens, user } = response.data;
+
+    setSession(tokens.access.token);
+
+    dispatch({
+      type: 'LOGIN',
+      payload: {
+        user,
+      },
+    });
+  }, []);
+
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
     const response = await axios.post('auth/register', {
@@ -136,7 +145,29 @@ export function AuthProvider({ children }) {
       password,
       name: `${firstName} ${lastName}`,
     });
-    const { tokens, user } = response.data;
+    const { user } = response.data;
+
+    dispatch({
+      type: 'REGISTER',
+      payload: {
+        user,
+        isAuthenticated: false
+      },
+    });
+
+    window.location.href = "/auth/verify"
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Google REGISTER
+  const registerWithGoogle = useCallback(async (email, name) => {
+    const response = await axios.post('auth/register-with-google', {
+      email,
+      password: 'google-oAuth2',
+      name,
+      isEmailVerified: true
+    });
+    const { user, tokens } = response.data;
 
     localStorage.setItem('accessToken', tokens.access.token);
 
@@ -144,6 +175,7 @@ export function AuthProvider({ children }) {
       type: 'REGISTER',
       payload: {
         user,
+        isAuthenticated: true
       },
     });
   }, []);
@@ -163,10 +195,12 @@ export function AuthProvider({ children }) {
       user: state.user,
       method: 'jwt',
       login,
+      loginWithGoogle,
       register,
+      registerWithGoogle,
       logout,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register]
+    [state.isAuthenticated, state.isInitialized, state.user, login, loginWithGoogle, logout, register,registerWithGoogle]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
